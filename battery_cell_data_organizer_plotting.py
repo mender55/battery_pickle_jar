@@ -1,7 +1,8 @@
 """
 Creator: Mirina Enderlin
+consultant: ChatGPT
 Date: February 2, 2026
-Last Updated: February 13, 2026
+Last Updated: February 17, 2026
 Description: This script is for organizing battery cell data into more convenient format for plotting
 
 
@@ -38,10 +39,11 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 import pickle
+#from pprint import pprint
 
 #USER INPUTS
-excel_data = "1014 MC CC1.002.xlsx" #copy and past excel pathway here
-battery_id = "1014_MC"  #input intended battery cell id
+excel_data = "1014 MC CC1.002.xlsx" #copy and past excel pathway here   #for loop for files in folder path
+battery_id = "1014_MC"  #input intended battery cell id #file name should be name before period
 
 pickle_path = "jar_of_batteries.pkl"     # making the pickle file
 
@@ -51,7 +53,7 @@ if os.path.exists(pickle_path):
 else:
     jar_of_batteries = {}     #the 'mother' dictionary that will hold each individual battery dictionary in pickle file
 
-df = pd.read_excel(excel_data, header=None, nrows = 1) #preserves Row 0 as is for extracting metadata
+df = pd.read_excel(excel_data, header=None, nrows = 1) #reads only the first row for extracting metadata
 
 battery = {'metadata':{},'data':{'cycles':{}}} #creates the empty libraries
 
@@ -62,7 +64,7 @@ battery['metadata'] = {
     "procedure":     df.iloc[0, 7],
     "scap":          df.iloc[0, 10],
     "c_rate":        df.iloc[0, 12],
-}
+}                                   #this is straight from Matthew's code for extracting metadata
 
 #now redo df to extract numerical data
 df = pd.read_excel(excel_data, header=1)
@@ -77,10 +79,10 @@ for cycle in df['Cycle P'].unique():      #looks only at column with cycle P val
         step_df = cycle_df[cycle_df['Step'] == step]   #makes a database for each STEP within individual CYCLES
         battery['data']['cycles'][cycle]['steps'][step] = {    #INside the cycle dictionary, step is a value, which is another dictionary
             'test_time': step_df['Test Time (Hr)'].tolist(),
-            'voltage': step_df['Voltage (V)'].tolist(),
+            'voltage': step_df['Voltage (V)'].tolist(),     #make step a column
             'current': step_df['Current (mA)'].tolist(),
             'step_time': step_df['Step Time (Hr)'].tolist(),
-            'capacity': step_df['Capacity (mAHr)'].tolist()
+            'capacity': step_df['Capacity (mAHr)'].tolist() #add energy column and mode (MD)
         }
 
 #prepping to put all in a pickle file
@@ -89,6 +91,7 @@ jar_of_batteries[battery_id]= battery
 with open(pickle_path, 'wb') as f:
     pickle.dump(jar_of_batteries,f)
 
+#demonstrating data was stored correctly and can be recalled via plotting
 plt.figure() #make empty figure
 
 for cycle_number in range(0, 2):   # This allows plotting of a single cycle or multiple cycles at once
@@ -98,8 +101,8 @@ for cycle_number in range(0, 2):   # This allows plotting of a single cycle or m
 
     for step in battery['data']['cycles'][cycle_number]['steps']:
         all_x.extend(
-            battery['data']['cycles'][cycle_number]['steps'][step]['capacity'] #appends list with cycle data 
-        )
+            battery['data']['cycles'][cycle_number]['steps'][step]['capacity'] #appends list with cycle data
+        )                                                                   #based on parameters input here
         all_y.extend(
             battery['data']['cycles'][cycle_number]['steps'][step]['voltage']
         )
@@ -107,10 +110,16 @@ for cycle_number in range(0, 2):   # This allows plotting of a single cycle or m
     plt.plot(all_x, all_y, label=f"Cycle {cycle_number}")
 
 
-plt.xlabel("Test Time (Hr)")    #relabel based on parameters being compared
+plt.xlabel("Capacity (mAh)")    #relabel based on parameters being compared
 plt.ylabel("Voltage (V)")
-plt.title("Cycle 0: Voltage vs Time")
+plt.title("Cycle 0: Voltage vs Capacity")
 plt.legend()
 plt.show()
 
+#make plotting script separate 
+'''
+with open(pickle_path, "rb") as f:
+        jar_of_batteries = pickle.load(f)
 
+pprint.pprint(jar_of_batteries)
+'''
