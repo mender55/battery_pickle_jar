@@ -24,7 +24,6 @@ if os.path.exists(pickle_path):
     if battery_to_plot not in jar_of_batteries:
         raise ValueError(f"{battery_to_plot} not found in pickle file.")
 
-    # 🔥 THIS WAS MISSING
     battery = jar_of_batteries[battery_to_plot]
 
     plt.figure() #make empty figure
