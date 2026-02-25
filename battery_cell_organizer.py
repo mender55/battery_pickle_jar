@@ -29,11 +29,9 @@ Battery_name = {
 
 """
 import pandas as pd
-import pickle
 import matplotlib.pyplot as plt
 import os
 import pickle
-import os #allows python to look at folders and files in folders
 
 
 folder_path = "battery_excels" #user inputs folder name here (include quotation marks and check the folder is in  same directory as this script)
@@ -94,31 +92,3 @@ with open(pickle_path, 'wb') as f:
 
 
 #thoughts for robustness: what if data is missing a column? what if file is .xls and not xlsx?
-
-
-#demonstrating data was stored correctly and can be recalled via plotting
-plt.figure() #make empty figure
-
-for cycle_number in range(0, 2):   # This allows plotting of a single cycle or multiple cycles at once
-    
-    all_x = []   #creates empty list of data to be appended based on however many cycles being plotted at once
-    all_y = []
-
-    for step in battery['data']['cycles'][cycle_number]['steps']:
-        all_x.extend(
-            battery['data']['cycles'][cycle_number]['steps'][step]['capacity'] #appends list with cycle data
-        )                                                                   #based on parameters input here
-        all_y.extend(
-            battery['data']['cycles'][cycle_number]['steps'][step]['voltage']
-        )
-
-    plt.plot(all_x, all_y, label=f"Cycle {cycle_number}")
-
-
-plt.xlabel("Capacity (mAh)")    #relabel based on parameters being compared
-plt.ylabel("Voltage (V)")
-plt.title("Cycle 0: Voltage vs Capacity")
-plt.legend()
-plt.show()
-
-#make plotting script separate 
